@@ -1,20 +1,20 @@
 class SkeetsController < ApplicationController
   BASE_URL = "https://bsky.social"
-  class AuthenticationError < StandardError; end
-  class ValidationError < StandardError; end
-
   def index
-    if session[:user].nil?
-      # Identifier must be without the @.
-      response = conn.post("/xrpc/com.atproto.server.createSession") do |req|
-        req.headers["Content-Type"] = "application/json"
-        req.body = JSON.generate({
-          identifier: ENV["BLUESKY_HANDLE"],
-          password: ENV["BLUESKY_PASSWORD"]
-        })
-      end
-      session[:user] = JSON.parse(response.body)
+    # Identifier must be without the @.
+
+    # https://docs.bsky.app/blog/create-post#authentication
+    # > com.atproto.server.createSession API endpoint returns a session object containing two API tokens: an access token (accessJwt)
+    # > which is used to authenticate requests but expires after a few minutes
+    # Always reauthenticate when you get back to this page.
+    response = conn.post("/xrpc/com.atproto.server.createSession") do |req|
+      req.headers["Content-Type"] = "application/json"
+      req.body = JSON.generate({
+        identifier: ENV["BLUESKY_HANDLE"],
+        password: ENV["BLUESKY_PASSWORD"]
+      })
     end
+    session[:user] = JSON.parse(response.body)
   end
 
   def create
