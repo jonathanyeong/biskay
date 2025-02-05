@@ -9,5 +9,10 @@ Rails.application.routes.draw do
   # get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
   # get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
   resources :skeets
+  mount MissionControl::Jobs::Engine, at: "/jobs"
   root "skeets#index"
 end
+
+# Adding mission control jobs
+# bin/rails credentials:edit <- Gen creds file
+# Or bin/rails mission_control:jobs:authentication:configure
