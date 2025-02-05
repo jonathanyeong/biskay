@@ -4,50 +4,53 @@ class SkeetsController < ApplicationController
   class ValidationError < StandardError; end
 
   def index
-    puts "#{ENV["BLUESKY_HANDLE"]} #{ENV["BLUESKY_PASSWORD"]}"
-    puts conn.inspect
-    # Identifier must be without the @.
-    puts JSON.generate({
-      identifier: ENV["BLUESKY_HANDLE"],
-      password: ENV["BLUESKY_PASSWORD"]
-    })
-    response = conn.post("/xrpc/com.atproto.server.createSession") do |req|
-      req.headers["Content-Type"] = "application/json"
-      req.body = JSON.generate({
-        identifier: ENV["BLUESKY_HANDLE"],
-        password: ENV["BLUESKY_PASSWORD"]
-      })
+    if session[:user].nil?
+      # Identifier must be without the @.
+      response = conn.post("/xrpc/com.atproto.server.createSession") do |req|
+        req.headers["Content-Type"] = "application/json"
+        req.body = JSON.generate({
+          identifier: ENV["BLUESKY_HANDLE"],
+          password: ENV["BLUESKY_PASSWORD"]
+        })
+      end
+      session[:user] = JSON.parse(response.body)
     end
-
-    puts response.inspect
-    session[:user] = JSON.parse(response.body)
   end
 
   def create
-    # current_time = Time.now.utc.strftime("%Y-%m-%dT%H:%M:%S.%3NZ")
+    # Parse the body and transform some of the markup into the correct things (like links)
+    # Handle scheduling
+    content = params[:content]
+    # TODO: Add alert
+    return redirect_to root_url if content.blank? || content.length > 300
 
-    # request_body = {
-    #   repo: @session["did"],
-    #   collection: "app.bsky.feed.post",
-    #   record: {
-    #     text: text.gsub(/<a href="[^"]*">|<\/a>/, ""),  # Remove HTML tags but keep link text
-    #     facets: [],
-    #     createdAt: current_time,
-    #     "$type": "app.bsky.feed.post"
-    #   }
-    # }
+    puts "CONTINUING TO BSKY"
+    current_time = Time.now.utc.strftime("%Y-%m-%dT%H:%M:%S.%3NZ")
 
-    #   response = connection.post("/xrpc/com.atproto.repo.createRecord") do |req|
-    #     req.headers["Content-Type"] = "application/json"
-    #     req.headers["Authorization"] = "Bearer #{@session["accessJwt"]}"
-    #     req.body = JSON.generate(request_body)
-    #   end
+    request_body = {
+      repo: session[:user]["did"],
+      collection: "app.bsky.feed.post",
+      record: {
+        text: content.gsub(/<a href="[^"]*">|<\/a>/, ""),  # Remove HTML tags but keep link text
+        facets: [],
+        createdAt: current_time,
+        "$type": "app.bsky.feed.post"
+      }
+    }
 
-    #   JSON.parse(response.body)
+    response = conn.post("/xrpc/com.atproto.repo.createRecord") do |req|
+      req.headers["Content-Type"] = "application/json"
+      req.headers["Authorization"] = "Bearer #{session[:user]["accessJwt"]}"
+      req.body = JSON.generate(request_body)
+    end
+
+    resp = JSON.parse(response.body)
+    puts resp
     # rescue Faraday::ResourceNotFound => e
     #   raise "Failed to post: The API endpoint returned 404. Please check if you're authenticated and using the correct API endpoint."
     # rescue Faraday::Error => e
     #   raise "Failed to post: #{e.message}"
+    redirect_to root_url
   end
 
   private
