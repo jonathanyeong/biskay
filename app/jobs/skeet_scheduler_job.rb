@@ -1,7 +1,13 @@
 class SkeetSchedulerJob < ApplicationJob
   queue_as :default
+  BASE_URL = "https://bsky.social"
 
   def perform(content: nil, identifier: nil, password: nil)
+    puts "PERFORM SKEET JOB"
+    conn = Faraday.new(url: BASE_URL) do |f|
+      f.request :json
+    end
+
     response = conn.post("/xrpc/com.atproto.server.createSession") do |req|
       req.headers["Content-Type"] = "application/json"
       req.body = JSON.generate({

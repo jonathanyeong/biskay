@@ -14,6 +14,9 @@ class SkeetsController < ApplicationController
         password: ENV["BLUESKY_PASSWORD"]
       })
     end
+    # TODO: Configurable timezone
+    Time.zone = "Eastern Time (US & Canada)"
+    @current_datetime = Time.zone.now
     session[:user] = JSON.parse(response.body)
   end
 
@@ -22,7 +25,22 @@ class SkeetsController < ApplicationController
     # Handle scheduling
     content = params[:content]
     # TODO: Add alert
+
+    Time.zone = "Eastern Time (US & Canada)"
+    scheduled_at = params["scheduled_at"]
+    scheduled_datetime = Time.zone.local(
+      scheduled_at["datetime(1i)"],
+      scheduled_at["datetime(2i)"],
+      scheduled_at["datetime(3i)"],
+      scheduled_at["datetime(4i)"],
+      scheduled_at["datetime(5i)"]
+    )
     return redirect_to root_url if content.blank? || content.length > 300
+
+    if scheduled_datetime > Time.zone.now
+      SkeetSchedulerJob.set(wait_until: scheduled_datetime).perform_later(content: content, identifier: ENV["BLUESKY_HANDLE"], password:  ENV["BLUESKY_PASSWORD"])
+      return redirect_to root_url
+    end
 
     puts "CONTINUING TO BSKY"
     current_time = Time.now.utc.strftime("%Y-%m-%dT%H:%M:%S.%3NZ")
