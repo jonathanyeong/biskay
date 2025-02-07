@@ -6,7 +6,9 @@ class SessionsController < ApplicationController
   end
 
   def create
-    if user = User.authenticate_by(params.permit(:identifier, :app_password))
+    user = User.authenticate_by(user_params) || User.create(user_params)
+
+    if user
       start_new_session_for user
       redirect_to after_authentication_url
     else
@@ -17,5 +19,11 @@ class SessionsController < ApplicationController
   def destroy
     terminate_session
     redirect_to new_session_path
+  end
+
+  private
+
+  def user_params
+    params.require(:user).permit(:identifier, :app_password)
   end
 end
