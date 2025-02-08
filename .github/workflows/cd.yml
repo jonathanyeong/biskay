@@ -36,8 +36,5 @@ jobs:
           chmod 600 ~/.ssh/id_ed25519
           echo "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
 
-      - name: Run kamal setup
-        run: |
-          echo "No existing deployment found, running initial setup..."
-          kamal app version
-
+      - name: Deploy with Kamal
+        run: kamal deploy
