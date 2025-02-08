@@ -10,8 +10,8 @@ class SkeetsController < ApplicationController
     response = conn.post("/xrpc/com.atproto.server.createSession") do |req|
       req.headers["Content-Type"] = "application/json"
       req.body = JSON.generate({
-        identifier: ENV["BLUESKY_HANDLE"],
-        password: ENV["BLUESKY_PASSWORD"]
+        identifier: Current.session.user.identifier,
+        password: Current.session.user.app_password
       })
     end
     # TODO: Configurable timezone
@@ -38,7 +38,7 @@ class SkeetsController < ApplicationController
     return redirect_to root_url if content.blank? || content.length > 300
 
     if scheduled_datetime > Time.zone.now
-      SkeetSchedulerJob.set(wait_until: scheduled_datetime).perform_later(content: content, identifier: ENV["BLUESKY_HANDLE"], password:  ENV["BLUESKY_PASSWORD"])
+      SkeetSchedulerJob.set(wait_until: scheduled_datetime).perform_later(content: content, user_id: Current.session.user.id)
       return redirect_to root_url
     end
 
@@ -64,10 +64,6 @@ class SkeetsController < ApplicationController
 
     resp = JSON.parse(response.body)
     puts resp
-    # rescue Faraday::ResourceNotFound => e
-    #   raise "Failed to post: The API endpoint returned 404. Please check if you're authenticated and using the correct API endpoint."
-    # rescue Faraday::Error => e
-    #   raise "Failed to post: #{e.message}"
     redirect_to root_url
   end
 

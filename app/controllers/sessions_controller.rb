@@ -6,7 +6,7 @@ class SessionsController < ApplicationController
   end
 
   def create
-    user = User.authenticate_by(user_params) || User.create(user_params)
+    user = User.find_by(user_params) || User.create(user_params)
 
     if user
       start_new_session_for user

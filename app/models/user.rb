@@ -1,6 +1,4 @@
 class User < ApplicationRecord
-  # We don't need to add validations here because the validation will be done
-  # on the BSKY api call
-  has_secure_password :app_password, validations: false
+  encrypts :app_password
   has_many :sessions, dependent: :destroy
 end
