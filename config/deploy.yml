@@ -7,10 +7,10 @@ image: jonathanyeong/bis_kay
 # Deploy to these servers.
 servers:
   web:
-    - 134.209.42.182
+    - 138.197.47.53
   job:
     hosts:
-      - 134.209.42.182
+      - 138.197.47.53
     cmd: bin/jobs
 
 # Enable SSL auto certification via Let's Encrypt and allow for multiple apps on a single web server.
