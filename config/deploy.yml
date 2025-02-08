@@ -2,7 +2,7 @@
 service: bis_kay
 
 # Name of the container image.
-image: your-user/bis_kay
+image: jonathanyeong/bis_kay
 
 # Deploy to these servers.
 servers:
