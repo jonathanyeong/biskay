@@ -66,4 +66,5 @@ group :test do
   gem "capybara"
   gem "selenium-webdriver"
 end
+# Without this gem the CI fails. Even though I don't use this gem in the app code.
 gem "net-smtp", "0.5.0"
