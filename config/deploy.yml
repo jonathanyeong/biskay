@@ -89,7 +89,8 @@ builder:
   #   - RAILS_MASTER_KEY
 
 # Use a different ssh user than root
-# ssh:
+ssh:
+  keys: [ "~/.ssh/id_ed25519" ]
 #   user: app
 
 # Use accessory services (secrets come from .kamal/secrets).
