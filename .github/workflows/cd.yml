@@ -34,10 +34,6 @@ jobs:
 
       - name: Run kamal setup
         run: |
-          if ! kamal app version; then
-            echo "No existing deployment found, running initial setup..."
-            kamal setup
-          else
-            echo "Existing deployment found, running deploy..."
-            kamal deploy
-          fi
+          echo "No existing deployment found, running initial setup..."
+          kamal setup
+
