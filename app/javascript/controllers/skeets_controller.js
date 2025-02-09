@@ -1,14 +1,14 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = [ "source", "counter", "submit" ]
+  static targets = [ "skeet", "counter", "submit" ]
 
   connect() {
     this.maxLengthValue = 300
   }
 
   validateLength() {
-    const remaining = this.maxLengthValue - this.sourceTarget.value.length
+    const remaining = this.maxLengthValue - this.skeetTarget.value.length
     this.counterTarget.textContent = `${remaining} characters remaining`
     // Update counter color based on remaining characters
     if (remaining < 0) {
@@ -29,6 +29,20 @@ export default class extends Controller {
       this.submitTarget.disabled = false
       this.submitTarget.classList.add("bg-indigo-600", "hover:bg-indigo-500")
       this.submitTarget.classList.remove("bg-indigo-400", "cursor-not-allowed")
+    }
+  }
+
+  checkScheduledDate() {
+    const day = document.getElementById("scheduled_at_datetime_3i")
+    const month = document.getElementById("scheduled_at_datetime_2i")
+    const year = document.getElementById("scheduled_at_datetime_1i")
+    const hour = document.getElementById("scheduled_at_datetime_4i")
+    const minute = document.getElementById("scheduled_at_datetime_5i")
+    const scheduledDate = new Date(year.value, (month.value - 1), day.value, hour.value, minute.value)
+    if (scheduledDate > Date.now()) {
+      this.submitTarget.value = "Schedule"
+    } else {
+      this.submitTarget.value = "Post"
     }
   }
 }
