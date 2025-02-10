@@ -74,7 +74,7 @@ class SkeetsController < ApplicationController
 
   def post_to_bsky(content)
     current_time = Time.now.utc.strftime("%Y-%m-%dT%H:%M:%S.%3NZ")
-    facets = tag_facets(content)
+    facets = tag_facets(content) + mention_facets(content)
     request_body = {
       repo: session[:user]["did"],
       collection: "app.bsky.feed.post",
@@ -108,6 +108,31 @@ class SkeetsController < ApplicationController
         features: [ {
           "$type": "app.bsky.richtext.facet#tag",
           tag: tag
+        } ]
+      }
+    end
+    facets
+  end
+
+  def mention_facets(content)
+    facets = []
+    # regex based on: https://atproto.com/specs/handle#handle-identifier-syntax
+    mention_pattern = /[$|\W](@([a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)/
+    matches = content.to_enum(:scan, mention_pattern).map { { handle: Regexp.last_match, indices: Regexp.last_match.offset(0) } }
+    matches.each do |match|
+      handle = match[:handle].to_s.strip[1..-1] # Trim leading @
+      indices = match[:indices]
+      resp = conn.get("/xrpc/com.atproto.identity.resolveHandle", { handle: handle })
+      # TODO: Add error handling
+      handle_did = JSON.parse(resp.body)["did"]
+      facets << {
+        index: {
+          byteStart: indices[0],
+          byteEnd: indices[1]
+        },
+        features: [ {
+          "$type": "app.bsky.richtext.facet#mention",
+          did: handle_did
         } ]
       }
     end
