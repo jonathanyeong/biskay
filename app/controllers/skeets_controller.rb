@@ -30,13 +30,14 @@ class SkeetsController < ApplicationController
 
     case commit_action
     when "Save Draft"
-      skeet = Skeet.new(content: content, user_id: Current.session.user.id, status: "draft")
+      Skeet.create(content: content, user_id: Current.session.user.id, status: "draft")
       # TODO: Graceful error handling
-      skeet.save!
     when "Post"
       # TODO: Add Flash message
       return redirect_to root_url if content.length > 300
-
+      Skeet.create(content: content, user_id: Current.session.user.id, status: "posted")
+      post_to_bsky(content)
+    when "Schedule"
       Time.zone = "Eastern Time (US & Canada)"
       scheduled_at = params["scheduled_at"]
       scheduled_datetime = Time.zone.local(
@@ -46,11 +47,10 @@ class SkeetsController < ApplicationController
         scheduled_at["datetime(4i)"],
         scheduled_at["datetime(5i)"]
       )
-      if scheduled_datetime > Time.zone.now
-        SkeetSchedulerJob.set(wait_until: scheduled_datetime).perform_later(content: content, user_id: Current.session.user.id)
-        return redirect_to root_url
-      end
-      post_to_bsky(content)
+      # Handle error
+      skeet = Skeet.create(content: content, user_id: Current.session.user.id, status: "scheduled")
+      SkeetSchedulerJob.set(wait_until: scheduled_datetime).perform_later(skeet_id: skeet.id)
+      return redirect_to root_url
     end
 
     redirect_to root_url
