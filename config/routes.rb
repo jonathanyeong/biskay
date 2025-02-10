@@ -9,6 +9,7 @@ Rails.application.routes.draw do
   # get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
   resources :skeets do
     post "share", on: :collection
+    get "search_actors", on: :collection
   end
   mount MissionControl::Jobs::Engine, at: "/jobs"
   root "skeets#index"

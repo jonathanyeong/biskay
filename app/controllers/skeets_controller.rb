@@ -64,10 +64,26 @@ class SkeetsController < ApplicationController
     redirect_to root_url
   end
 
+  def search_actors
+    resp = public_conn.get("/xrpc/app.bsky.actor.searchActorsTypeahead", { q: params[:q], limit: 8 })
+    puts JSON.parse(resp.body)
+    @actors = JSON.parse(resp.body)["actors"]
+
+    respond_to do |format|
+      format.turbo_stream { render turbo_stream: turbo_stream.update("mentions-dropdown", partial: "skeets/actor_suggestions", locals: { actors: @actors }) }
+    end
+  end
+
   private
 
   def conn
     @conn ||= Faraday.new(url: BASE_URL) do |f|
+      f.request :json
+    end
+  end
+
+  def public_conn
+    @public_conn ||= Faraday.new(url: "https://public.api.bsky.app") do |f|
       f.request :json
     end
   end

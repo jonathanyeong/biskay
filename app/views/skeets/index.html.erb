@@ -2,7 +2,8 @@
 
 <%= form_tag "/skeets", data: { controller: "skeets" } do %>
   <div class="relative">
-    <%= text_area_tag :content, nil, rows: 5, class: "block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6", data: { action: "skeets#validateLength", skeets_target: "skeet" } %>
+    <%= text_area_tag :content, nil, rows: 5, class: "block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6", data: { action: "skeets#onInput  keydown->skeets#onKeydown", skeets_target: "skeet" } %>
+    <div data-skeets-target="dropdown" id="mentions-dropdown" class="absolute left-0 w-full mt-1 bg-white rounded-md shadow-lg max-h-60 overflow-y-auto z-50"></div>
     <div data-skeets-target="counter" class="absolute bottom-2 right-2 text-sm text-gray-500">
       300 characters remaining
     </div>
@@ -27,4 +28,3 @@
     </div>
   </div>
 <% end %>
-<%# share now %>
