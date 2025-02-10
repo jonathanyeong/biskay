@@ -74,13 +74,13 @@ class SkeetsController < ApplicationController
 
   def post_to_bsky(content)
     current_time = Time.now.utc.strftime("%Y-%m-%dT%H:%M:%S.%3NZ")
-
+    facets = tag_facets(content)
     request_body = {
       repo: session[:user]["did"],
       collection: "app.bsky.feed.post",
       record: {
         text: content.gsub(/<a href="[^"]*">|<\/a>/, ""),  # Remove HTML tags but keep link text
-        facets: [],
+        facets: facets,
         createdAt: current_time,
         "$type": "app.bsky.feed.post"
       }
@@ -91,5 +91,26 @@ class SkeetsController < ApplicationController
       req.headers["Authorization"] = "Bearer #{session[:user]["accessJwt"]}"
       req.body = JSON.generate(request_body)
     end
+  end
+
+  def tag_facets(content)
+    facets = []
+    tag_pattern = /#\S+/
+    matches = content.to_enum(:scan, tag_pattern).map { { tag: Regexp.last_match, indices: Regexp.last_match.offset(0) } }
+    matches.each do |match|
+      tag = match[:tag].to_s[1..-1] # Trim leading hashtag
+      indices = match[:indices]
+      facets << {
+        index: {
+          byteStart: indices[0],
+          byteEnd: indices[1]
+        },
+        features: [ {
+          "$type": "app.bsky.richtext.facet#tag",
+          tag: tag
+        } ]
+      }
+    end
+    facets
   end
 end
