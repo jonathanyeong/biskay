@@ -22,10 +22,10 @@ export default class extends Controller {
 
   onKeydown(event) {
     if (!this.isOpen) return
-    event.preventDefault()
 
     switch(event.key) {
       case 'ArrowDown':
+        event.preventDefault()
         this.selectedIndex = Math.min(
           this.selectedIndex + 1,
           this.dropdownTarget.querySelectorAll('li').length - 1
@@ -33,11 +33,13 @@ export default class extends Controller {
         this.updateHighlight()
         break
       case 'ArrowUp':
+        event.preventDefault()
         this.selectedIndex = Math.max(this.selectedIndex - 1, 0)
         this.updateHighlight()
         break
       case 'Enter':
         if (this.selectedIndex >= 0) {
+          event.preventDefault()
           const selectedUser = this.dropdownTarget.querySelectorAll('li')[this.selectedIndex]
           this.selectUser({ currentTarget: selectedUser })
         }
