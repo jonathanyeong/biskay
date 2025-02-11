@@ -90,7 +90,7 @@ class SkeetsController < ApplicationController
 
   def post_to_bsky(content)
     current_time = Time.now.utc.strftime("%Y-%m-%dT%H:%M:%S.%3NZ")
-    facets = tag_facets(content) + mention_facets(content)
+    facets = tag_facets(content) + mention_facets(content) + url_facets(content)
     request_body = {
       repo: session[:user]["did"],
       collection: "app.bsky.feed.post",
@@ -149,6 +149,29 @@ class SkeetsController < ApplicationController
         features: [ {
           "$type": "app.bsky.richtext.facet#mention",
           did: handle_did
+        } ]
+      }
+    end
+    facets
+  end
+
+  def url_facets(content)
+    facets = []
+    # partial/naive URL regex based on: https://stackoverflow.com/a/3809435
+    # tweaked to disallow some training punctuation
+    url_pattern = /(https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&\/\/=]*[-a-zA-Z0-9@%_\+~#\/\/=])?)/
+    matches = content.to_enum(:scan, url_pattern).map { { url: Regexp.last_match, indices: Regexp.last_match.offset(0) } }
+    matches.each do |match|
+      url = match[:url].to_s
+      indices = match[:indices]
+      facets << {
+        index: {
+          byteStart: indices[0],
+          byteEnd: indices[1]
+        },
+        features: [ {
+          "$type": "app.bsky.richtext.facet#link",
+          uri: url
         } ]
       }
     end
