@@ -35,7 +35,7 @@ class SkeetsController < ApplicationController
     when "Post"
       # TODO: Add Flash message
       return redirect_to root_url if content.length > 300
-      Skeet.create(content: content, user_id: Current.session.user.id, status: "posted")
+      Skeet.create(content: content, user_id: Current.session.user.id, status: "published")
       post_to_bsky(content)
     when "Schedule"
       Time.zone = "Eastern Time (US & Canada)"
