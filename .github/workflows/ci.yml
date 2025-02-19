@@ -4,6 +4,10 @@ on:
   pull_request:
   push:
     branches: [ main ]
+    paths-ignore:
+      - '.devcontainer/*'
+      - '.github/*'
+      - '*.md'
 
 jobs:
   scan_ruby:
