@@ -68,3 +68,4 @@ group :test do
 end
 # Without this gem the CI fails. Even though I don't use this gem in the app code.
 gem "net-smtp", "0.5.0"
+gem "bsky-parser", "~> 1.0"
