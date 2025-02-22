@@ -10,7 +10,14 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_02_22_140018) do
+ActiveRecord::Schema[8.0].define(version: 2025_02_22_190404) do
+  create_table "bsky_users", force: :cascade do |t|
+    t.string "identifier"
+    t.string "app_password"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "skeets", force: :cascade do |t|
     t.text "content"
     t.string "status", default: "draft"
@@ -19,6 +26,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_02_22_140018) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "identifier"
+    t.integer "bsky_user_id"
+    t.index ["bsky_user_id"], name: "index_skeets_on_bsky_user_id"
     t.index ["identifier"], name: "index_skeets_on_identifier"
   end
 end

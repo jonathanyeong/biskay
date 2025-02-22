@@ -24,20 +24,19 @@ class SkeetsController < ApplicationController
   end
 
   def create
-    # Parse the body and transform some of the markup into the correct things (like links)
     content = params[:content]
     # TODO: Handle blank submits (client side validation)
     return redirect_to root_url if content.blank?
     commit_action = params[:commit]
+    return redirect_to root_url if content.length > 300 && commit_action == "Post"
 
+    user = BskyUser.create(identifier: session[:identifier], app_password: session[:app_password])
+    skeet = user.skeets.create(content: content)
     case commit_action
     when "Save Draft"
-      Skeet.create(content: content, identifier: session[:identifier], status: "draft")
-      # TODO: Graceful error handling
+      skeet.draft!
     when "Post"
-      # TODO: Add Flash message
-      return redirect_to root_url if content.length > 300
-      Skeet.create(content: content, identifier: session[:identifier], status: "published")
+      skeet.published!
       post_to_bsky(content)
     when "Schedule"
       Time.zone = "Eastern Time (US & Canada)"
@@ -50,8 +49,8 @@ class SkeetsController < ApplicationController
         scheduled_at["datetime(5i)"]
       )
       # Handle error
-      skeet = Skeet.create(content: content, identifier: session[:identifier], status: "scheduled")
-      SkeetSchedulerJob.set(wait_until: scheduled_datetime).perform_later(skeet_id: skeet.id, refresh_jwt: session[:user]["refreshJwt"])
+      skeet.scheduled!
+      SkeetSchedulerJob.set(wait_until: scheduled_datetime).perform_later(skeet_id: skeet.id)
       return redirect_to root_url
     end
 
