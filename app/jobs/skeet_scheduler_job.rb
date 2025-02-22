@@ -4,22 +4,20 @@ class SkeetSchedulerJob < ApplicationJob
   queue_as :default
   BASE_URL = "https://bsky.social"
 
-  def perform(skeet_id: nil)
+  def perform(skeet_id: nil, refresh_jwt: nil)
     skeet = Skeet.find(skeet_id)
-    user = skeet.user
     content = skeet.content
-    session = create_session(user)
+    session = create_session(refresh_jwt)
     post_to_bsky(content, session)
   end
 
   private
 
-  def create_session(user)
-    response = conn.post("/xrpc/com.atproto.server.createSession") do |req|
+  def create_session(refresh_jwt)
+    response = conn.post("/xrpc/com.atproto.server.refreshSession") do |req|
       req.headers["Content-Type"] = "application/json"
       req.body = JSON.generate({
-        identifier: user.identifier,
-        password: user.app_password
+        refresh_jwt: refresh_jwt
       })
     end
     JSON.parse(response.body)

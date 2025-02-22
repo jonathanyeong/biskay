@@ -32,12 +32,12 @@ class SkeetsController < ApplicationController
 
     case commit_action
     when "Save Draft"
-      Skeet.create(content: content, user_id: Current.session.user.id, status: "draft")
+      Skeet.create(content: content, identifier: session[:identifier], status: "draft")
       # TODO: Graceful error handling
     when "Post"
       # TODO: Add Flash message
       return redirect_to root_url if content.length > 300
-      Skeet.create(content: content, user_id: Current.session.user.id, status: "published")
+      Skeet.create(content: content, identifier: session[:identifier], status: "published")
       post_to_bsky(content)
     when "Schedule"
       Time.zone = "Eastern Time (US & Canada)"
@@ -50,8 +50,8 @@ class SkeetsController < ApplicationController
         scheduled_at["datetime(5i)"]
       )
       # Handle error
-      skeet = Skeet.create(content: content, user_id: Current.session.user.id, status: "scheduled")
-      SkeetSchedulerJob.set(wait_until: scheduled_datetime).perform_later(skeet_id: skeet.id)
+      skeet = Skeet.create(content: content, identifier: session[:identifier], status: "scheduled")
+      SkeetSchedulerJob.set(wait_until: scheduled_datetime).perform_later(skeet_id: skeet.id, refresh_jwt: session[:user]["refreshJwt"])
       return redirect_to root_url
     end
 
