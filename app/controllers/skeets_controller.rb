@@ -13,8 +13,8 @@ class SkeetsController < ApplicationController
     response = conn.post("/xrpc/com.atproto.server.createSession") do |req|
       req.headers["Content-Type"] = "application/json"
       req.body = JSON.generate({
-        identifier: Current.session.user.identifier,
-        password: Current.session.user.app_password
+        identifier: session[:identifier],
+        password: session[:app_password]
       })
     end
     # TODO: Configurable timezone
