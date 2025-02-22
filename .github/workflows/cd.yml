@@ -42,3 +42,6 @@ jobs:
 
       - name: Deploy with Kamal
         run: kamal setup
+        env:
+          SSH_KEY_PATH: ${{env.SSH_KEY_PATH}}
+          SERVER_IP:    ${{env.SERVER_IP}}
