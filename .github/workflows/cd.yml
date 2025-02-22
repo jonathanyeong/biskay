@@ -32,13 +32,11 @@ jobs:
 
       - name: Setup SSH
         env:
-          SSH_KNOWN_HOSTS: ${{secrets.SSH_KNOWN_HOSTS}}
           SSH_PRIVATE_KEY: ${{secrets.SSH_PRIVATE_KEY}}
         run: |
           mkdir -p ~/.ssh
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
-          echo "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
 
       - name: Deploy with Kamal
         run: kamal setup
