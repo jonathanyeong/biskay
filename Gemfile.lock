@@ -85,7 +85,7 @@ GEM
       msgpack (~> 1.2)
     brakeman (7.0.0)
       racc
-    bsky-parser (1.0.1)
+    bsky-parser (1.0.2)
       faraday (~> 2.12.2)
     builder (3.3.0)
     capybara (3.40.0)
